@@ -1,0 +1,5 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Landing page for stolmen's experiments.</h1>
+  <li><a href="{{ url_for('get_strava_auth') }}">Get strava auth</a></li>
+{% endblock %}
