@@ -13,15 +13,15 @@ class Strava_API_V3(object):
     def __init__(self, access_token):
         self.access_token = access_token
 
-    def _return_get_response(self, url_extension, data=None):
+    def _return_get_response(self, url_extension, **kwargs):
         url = self.API_BASE_URL + url_extension
 
-        if data == None:
-            data = {'access_token': self.access_token}
+        if kwargs == None:
+            kwargs = {'access_token': self.access_token}
         else:
-            data['access_token'] = self.access_token
+            kwargs['access_token'] = self.access_token
         
-        return requests.get(url, params=data).json()
+        return requests.get(url, data=kwargs).json()
 
     def list_athlete_friends(self, id=None):
         if id:
@@ -30,4 +30,13 @@ class Strava_API_V3(object):
             url = 'athlete/friends'
         
         return self._return_get_response(url)
+
+    def list_recent_followers_activities(self):
+        return self._return_get_response('activities/following', page=1, per_page=200)
+        
+
+
+class Strava_Extensions(Strava_API_V3):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 

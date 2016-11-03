@@ -16,10 +16,13 @@
     # Only render the stuff below if a friend has been chosen.
     {% if friend_target_comparison_info %}
         <h2> {{ athlete_info.firstname }} {{ athlete_info.lastname }} vs {{ chosen_friend.firstname }} {{ chosen_friend.lastname }}</h2>
-        number of common segments: {{ friend_target_comparison_info.num_common_segments }}<br>
-        number of common segments YOU were faster: {{ friend_target_comparison_info.num_common_segments_i_am_faster }}<br>
-        mean average speed delta over for all common segment best efforts: {{ friend_target_comparison_info.mean_speed_delta_over_all_common_segments }}
+        kudos: {{ friend_target_comparison_info.kudos_comparison }}<br>
+        achivements: {{ friend_target_comparison_info.achievement_comparison }}<br>
     {% endif %}
+
+
+            'kudos_comparison': kudos_totals,
+            'achievement_comparison': achievement_comparison,
 
 {% endblock %}
 
