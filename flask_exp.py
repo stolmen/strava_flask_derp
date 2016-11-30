@@ -72,7 +72,7 @@ def strava_comparison():
     # in which case, need to populate friend_target_comparison_info
     if request.method == 'POST':
         # TODO - find a better fix. Seems that the request does not put True and False in quotes, so this has to be done before deserialisation... (JSON --> Dict) =__=
-        target_athlete = json.loads(request.form['friend_id_to_compare'].replace('\'', '\"').replace("False", "\"False\"").replace("True", "\"True\"").replace("None", "\"None\""))
+        target_athlete = json.loads(request.form['friend_id_to_compare'].replace('\'', '\"').replace("False", "\"False\"").replace("True", "\"True\"").replace("None", "\"None\"").replace("u\"", "\""))
         current_athlete_recent_activities, target_athlete_recent_activities = recent_activites_filtered(protocol, current_athlete), recent_activites_filtered(protocol, target_athlete)
 
         kudos_totals = [num_kudos_per_follower_in_activites(activity_list) for activity_list in (current_athlete_recent_activities, target_athlete_recent_activities)] 
@@ -220,5 +220,5 @@ def strava_redirect_url(client_id, client_secret, redirect_uri):
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port='9001')
+    app.run(host='127.0.0.1', port=9001, debug=True)
 
