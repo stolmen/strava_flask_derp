@@ -13,7 +13,12 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash, json
 import requests
 from strava_api_v3_protocol import Strava_API_V3
-from client_secret import STRAVA_CLIENT_SECRET, STRAVA_CLIENT_ID 
+
+# These should really be stored as environment variables and not in any code!
+# from client_secret import STRAVA_CLIENT_SECRET, STRAVA_CLIENT_ID 
+
+STRAVA_CLIENT_ID  = os.environ['STRAVA_CLIENT_ID']
+STRAVA_CLIENT_SECRET = os.environ['STRAVA_CLIENT_SECRET']
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -211,4 +216,8 @@ def strava_redirect_url(client_id, client_secret, redirect_uri):
     parameters_string = '&'.join(['{}={}'.format(key, value) for key, value in parameters.items()])
 
     return "{}?{}".format(STRAVA_AUTHORISE_URL, parameters_string)
+
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port='9001')
 
