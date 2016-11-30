@@ -183,7 +183,8 @@ def get_strava_auth():
     
     # todo: handle an access denied authorisation code response from the Strava API
     if not have_strava_auth():
-        return redirect(strava_redirect_url(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, redirect_uri=r'http://192.168.1.131:5000' + url_for('handle_auth_code')))
+        # todo: remove hardcoded domain name
+        return redirect(strava_redirect_url(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, redirect_uri=r'http://strava-derp.herokuapp.com' + url_for('handle_auth_code')))
 
 
 @app.route('/handle_auth_code')
