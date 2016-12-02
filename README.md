@@ -18,7 +18,7 @@ Git clone, create and activate venv, install requirements, then `python flask_ex
 
 ## Tests
 
-None at the moment! :( 
+python -m unittest tests.unittests.tooltests -v
 
 ## Contributors
 
