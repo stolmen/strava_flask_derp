@@ -8,32 +8,26 @@
 
 # all the imports
 import os
-import sqlite3
-from flask import Flask, request, session, g, redirect, url_for, abort, \
-     render_template, flash, json
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, json
 import requests
-from strava_api_v3_protocol import Strava_API_V3
+from tools.strava_api_v3_protocol import Strava_API_V3, generate_strava_redirect_url, exchange_auth_code_for_token
 
 # These should really be stored as environment variables and not in any code!
 # from client_secret import STRAVA_CLIENT_SECRET, STRAVA_CLIENT_ID 
 
-STRAVA_CLIENT_ID  = os.environ['STRAVA_CLIENT_ID']
+STRAVA_CLIENT_ID = os.environ['STRAVA_CLIENT_ID']
 STRAVA_CLIENT_SECRET = os.environ['STRAVA_CLIENT_SECRET']
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 app.config.update(dict(
-    SECRET_KEY='development key',       # should be difficult to guess - keeps 'client side sessions' secure
+    SECRET_KEY='development key',    # should be difficult to guess - keeps 'client side sessions' secure
 ))
 
 # Environment specific list of settings.
 # Set environment variable FLASKR_SETTINGS to path of config file
 app.config.from_envvar('FLASK_EXP_SETTINGS', silent=True)
-
-# Strava specific things. TODO: move this to another module
-STRAVA_AUTHORISE_URL = r'https://www.strava.com/oauth/authorize'
-STRAVA_TOKEN_URL = r'https://www.strava.com/oauth/token'
 
 
 @app.route('/')
@@ -54,8 +48,6 @@ def have_strava_auth():
 def strava_comparison():
     """ Strava athelete comparison """
 
-    # check for auth
-    # if it doesn't exist, then redirect to auth page to get it, then come back. 
     if not have_strava_auth():
         return redirect(url_for('get_strava_auth'))
 
@@ -72,7 +64,9 @@ def strava_comparison():
     # in which case, need to populate friend_target_comparison_info
     if request.method == 'POST':
         # TODO - find a better fix. Seems that the request does not put True and False in quotes, so this has to be done before deserialisation... (JSON --> Dict) =__=
-        target_athlete = json.loads(request.form['friend_id_to_compare'].replace('\'', '\"').replace("False", "\"False\"").replace("True", "\"True\"").replace("None", "\"None\"").replace("u\"", "\""))
+        target_athlete_info_string = request.form['friend_id_to_compare']
+        print("Info string: {}".format(target_athlete_info_string))
+        target_athlete = json.loads(target_athlete_info_string.replace('\'', '\"').replace("False", "\"False\"").replace("True", "\"True\"").replace("None", "\"None\"").replace("u\"", "\""))
         current_athlete_recent_activities, target_athlete_recent_activities = recent_activites_filtered(protocol, current_athlete), recent_activites_filtered(protocol, target_athlete)
 
         kudos_totals = [num_kudos_per_follower_in_activites(activity_list) for activity_list in (current_athlete_recent_activities, target_athlete_recent_activities)] 
@@ -180,43 +174,17 @@ def get_list_of_effort_pairs_that_share_segment(protocol, athlete_me, athlete_ot
 @app.route('/strava_authenticate')
 def get_strava_auth():
     """ Gets strava auth token, chucks into app """
-    
     # todo: handle an access denied authorisation code response from the Strava API
     if not have_strava_auth():
         # todo: remove hardcoded domain name
-        return redirect(strava_redirect_url(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, redirect_uri=r'http://strava-derp.herokuapp.com' + url_for('handle_auth_code')))
+        return redirect(generate_strava_redirect_url(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, redirect_uri=os.environ['STRAVA_API_REDIRECT_URI'] + url_for('handle_auth_code')))
 
 
 @app.route('/handle_auth_code')
 def handle_auth_code():
     code = request.args.get('code')
-    print(code)
     session['strava_auth'] = exchange_auth_code_for_token(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, auth_code=code)
-    
     return redirect(url_for('strava_comparison'))
-
-
-def exchange_auth_code_for_token(client_id, client_secret, auth_code):
-    response = requests.post(STRAVA_TOKEN_URL, {'client_id': client_id, 'client_secret':client_secret, 'code': auth_code})
-    return response.json()      # todo - handle exchange attempt failure case
-
-
-def strava_redirect_url(client_id, client_secret, redirect_uri):    
-    # TODO: utilise requests module for URL construction
-    parameters = {
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'redirect_uri': redirect_uri,
-#        'scope': ' ',
-        'state': 'dummy_state',
-        'approval_prompt': 'auto',
-        'response_type': 'code',
-    }
-
-    print(parameters['redirect_uri'])
-    parameters_string = '&'.join(['{}={}'.format(key, value) for key, value in parameters.items()])
-
-    return "{}?{}".format(STRAVA_AUTHORISE_URL, parameters_string)
 
 
 if __name__ == '__main__':
