@@ -1,29 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
     <h1>Strava: </h1>
-    Authenticated as {{ athlete_info.firstname }} {{ athlete_info.lastname }}
-    <h2>Choose 'friend' to fight:</h2>
-    <form method="post">
-        <select name="friend_id_to_compare">
-            {% for friend in friends %}
-            <option value="{{ friend }}">{{ friend.firstname }} {{ friend.lastname }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <input type="submit">
-    </form>
+    Authenticated as {{ authenticated_athlete_info.firstname }} {{ authenticated_athlete_info.lastname }}
+    <h2>How your recent activities compare against your friends':</h2>
 
-    # Only render the stuff below if a friend has been chosen.
-    {% if friend_target_comparison_info %}
-        <h2> {{ athlete_info.firstname }} {{ athlete_info.lastname }} vs {{ chosen_friend.firstname }} {{ chosen_friend.lastname }}</h2>
-        kudos: {{ friend_target_comparison_info.kudos_comparison }}<br>
-        achivements: {{ friend_target_comparison_info.achievement_comparison }}<br>
-    {% endif %}
+    <table border="1">
+    <tr> <td> <b>Full name</b> </td>    <td> <b>KUDOS</b> </td>    <td> <b>CUPS</b> </td> </tr>
+    {% for friend in friends_stats_summary|sort(attribute='total_num_recent_kudos', reverse=True) %}
 
+        {% if friend.full_name == (authenticated_athlete_info.firstname + ' ' + authenticated_athlete_info.lastname) %}
+        <tr style="color: #fff; background: black;">
+        {% else %}
+        <tr>        
+        {% endif %}
+            <td> {{ friend.full_name }} </td>
 
-            'kudos_comparison': kudos_totals,
-            'achievement_comparison': achievement_comparison,
+            <td> {{ friend.total_num_recent_kudos }} </td>
 
+            <td> {{ friend.total_num_recent_achievements }} </td>
+        </tr>
+    {% endfor %}    
+    </table>    
 {% endblock %}
 
 
