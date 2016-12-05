@@ -12,9 +12,7 @@ Finally, you have a way to claim irrefutable supriority over another user. Or in
 
 ## Installation
 
-Nothing out of the ordinary. 
-
-Git clone, create and activate venv, install requirements, then `python flask_exp.py`.
+Git clone, create and activate venv, install requirements, then `python views.py`.
 
 ## Tests
 
